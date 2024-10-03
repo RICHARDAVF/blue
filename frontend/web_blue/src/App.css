@@ -1,0 +1,180 @@
+@import url("https://fonts.googleapis.com/css2?=family=Roboto:wght@400;900&display=swap");
+body{
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto',sans-serif;
+  color: #eaecef;
+}
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 300px;
+}
+
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #011627;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  color: #011627;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  width: 95%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.login-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover {
+  background-color: #0056b3;
+}
+
+/* header{
+  padding: 20px;
+  background: #011627;
+  height: 20px;
+} */
+
+.navbar {
+  width: 240px; /* Ancho del sidebar */
+  background: #011627;
+  height: 100vh;
+  padding-left: 25px;
+  position: relative; /* Asegúrate de que el sidebar no esté absoluto */
+  transition: transform  0.3s ease; /* Para suavizar el cambio */
+  transform: translateX(-100%); /* Comienza oculto */
+}
+.navbar.active {
+  transform: translateX(0); /* Mostrar el sidebar */
+}
+.logo{
+  width: 60px;
+}
+ul{
+  padding: 0;
+}
+ul li {
+  list-style-type: none;
+  margin: 10px 0;
+}
+ul li a{
+  color: #eaecef;
+  text-decoration: none;
+  font-size: 16px;
+  display: block;
+  padding: 10px 15px;
+  border-radius: 6px;
+}
+ul li a:hover,
+ul li a:active{
+  background:#172b4d ;
+}
+header svg{
+  font-size: 20px;
+}
+
+.main{
+  display: flex;
+  height: 100vh;
+}
+.content {
+  flex: 1; /* El contenido ocupa el resto del espacio */
+  padding: 20px;
+  transition: margin-left 0.3s ease; /* Para suavizar el cambio */
+  color: #011627;
+
+}
+
+
+
+.header-container {
+  display: flex; /* Usar Flexbox para alinear horizontalmente */
+  justify-content: space-between; /* Espaciar elementos al máximo */
+  align-items: center; /* Alinear verticalmente en el centro */
+  width: 100%; /* Asegurar que el contenedor ocupe todo el ancho */
+  margin-bottom: 16px; /* Espacio entre el header y la tabla */
+}
+
+.register-button {
+  padding: 8px 12px; /* Espaciado interno para el botón */
+  background-color: #28a745; /* Color de fondo del botón */
+  color: white; /* Color del texto del botón */
+  border: none; /* Sin borde */
+  border-radius: 4px; /* Bordes redondeados */
+  cursor: pointer; /* Cambia el cursor al pasar sobre el botón */
+}
+
+.register-button:hover {
+  background-color: #218838; /* Color de fondo del botón al pasar el mouse */
+}
+
+.search-container {
+  display: flex; /* Usar Flexbox para el input */
+  justify-content: flex-end; /* Alinear el input a la derecha */
+}
+
+.search-input {
+  padding: 8px; 
+  border: 1px solid #ccc; 
+  border-radius: 4px; 
+  width: 250px; 
+  margin-left: 10px; 
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; 
+
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 600px; 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}

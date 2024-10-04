@@ -25,10 +25,9 @@ class PedidoView(GenericAPIView):
                 WHERE 
                     a.ped_cierre=0 AND a.elimini=0
                     AND a.mov_codaux=?
-                ORDER BY MOV_FECHA DESC, MOV_COMPRO DESC
+                ORDER BY MOV_COMPRO DESC
             """
             res = CAQ.query(sql,(datos["codigo"],),'GET',1)
-            print(res)
             if res["success"] and len(res["data"])>0:
                 data = [
                     {
@@ -50,7 +49,7 @@ class PedidoView(GenericAPIView):
             else:
                 data["error"] = "No hay registros para mostrar"
         except Exception as e:
- 
+            print(str(e))
             data["error"] = f"Ocurrio un error:{str(e)}"
         return Response(data)
     def estado_pedido(self,anulado,state1,state2):
@@ -69,15 +68,15 @@ class SavePedidoView(GenericAPIView):
         data = {}
         datos = request.data
         try:
-            sql = "SELECT TOP 1 MOV_COMPRO cabepedido WHERE SUBSTRING(mov_compro,1,2)=? ORDER BY MOV_COMPRO DESC"  
-            params = ('01',)
+            sql = "SELECT TOP 1 MOV_COMPRO FROM cabepedido WHERE SUBSTRING(mov_compro,1,3)=? ORDER BY MOV_COMPRO DESC"  
+            params = ('001',)
             res = CAQ.query(sql,params,'GET',0)
             cor_res = ['1']
             if res["success"] and len(res["data"])!=0:
                 cor_res = res["data"][0]
             base_imponible = round(float(datos["total"])/1.18,2)
             igv = float(datos["total"])-base_imponible
-            correlativo = f'01-{str(int(cor_res[0].split("-")[-1])+1).zfill(7)}'
+            correlativo = f'001-{str(int(cor_res.split("-")[-1])+1).zfill(7)}'
             total_sin_descuento = self.total_sin_descuento(datos["items"])
             descuento_total = abs(float(datos["total"])-total_sin_descuento)
             params = (correlativo,self.fecha.strftime("%Y-%m-%d"),datos["codigo"],"S","01",self.fecha,datos["total"],
@@ -108,3 +107,18 @@ class SavePedidoView(GenericAPIView):
         return Response(data)
     def total_sin_descuento(self,data):
         return sum([float(i["precio"])*float(i["cantidad"]) for i in data])
+class LoadImage(GenericAPIView):
+    def post(self,request,*args,**kwargs):
+        data = {}
+        datos = request.data
+        try:
+            sql = "SELECT art_image2  FROM t_articulo_imagen WHERE art_codigo=?"
+            res = CAQ.query(sql,(datos['codigo'],),'GET',0)
+            if res['success'] and len(res['data'])>0:
+                data['image'] = res["data"][0]
+                data['success'] = True
+            else:
+                data['error'] = 'No se pudo cargar la imagen o no esta disponible'
+        except Exception as e:
+            data['error'] = 'Imagen no disponible'
+        return Response(data)

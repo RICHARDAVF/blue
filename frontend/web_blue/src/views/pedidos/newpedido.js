@@ -2,7 +2,8 @@ import { Component } from "react";
 import { Context } from "../../components/GlobalContext";
 import { withRouter } from "../../components/Router";
 import DataTable from "react-data-table-component";
-import { FaPlus } from "react-icons/fa"
+import { FaPlus,FaTrash } from "react-icons/fa"
+import Swal from 'sweetalert2'
 import Modal from "../../components/modal";
 class NewPedido extends Component {
     static contextType = Context
@@ -16,13 +17,15 @@ class NewPedido extends Component {
             productos: [],
             subtotal: 0.00,
             igv: 0.00,
-            total: 0.00
+            total: 0.00,
+            image:null
         }
     }
     componentDidMount() {
 
         this.requestArticulo(this.state.palabra)
     }
+
     
     async requestArticulo(palabra) {
         const { dominio } = this.context
@@ -52,7 +55,32 @@ class NewPedido extends Component {
     show_modal = () => {
         this.setState({ visible: !this.state.visible })
     }
+    async requestImage(codigo){
+        const {dominio} = this.context
+        const url = `${dominio}/api/v1/load/image/`
+        const datos = {
+            "codigo":codigo
+        }
+        try{
+            const response = await fetch(url,{
+                method: 'POST',
+                headers: {
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify(datos)
+            })
+            const res = await response.json()
+            if(res.success){
+                this.setState({image:res})
+            }else{
+                this.setState({image:null})
+            }
+        }catch(error){
+            this.setState({image:null})
+        }
+    }
     select_articulo = (row) => {
+        this.requestImage(row.codigo)
         row.cantidad = 1
         row.descuento = 0
         row.subtotal = row.precio
@@ -65,23 +93,46 @@ class NewPedido extends Component {
             this.requestArticulo(palabra)
         }
     }
-    save_data = (item) => {
-        const index = this.state.productos.findIndex(value => value.codigo == item.codigo)
+    add_data = (item) => {
+        const index = this.state.productos.findIndex(value => value.codigo === item.codigo)
         if (index === -1) {
-            var total = 0
             const newdata = [...this.state.productos, item]
-
-            for (let value of newdata) {
-    
-                total += parseFloat(value.subtotal)
-            }
-            const igv = (total * 0.18).toFixed(2)
-            const subtotal = (total - igv).toFixed(2)
-
-            this.setState({ productos: newdata, subtotal: subtotal, igv: igv, total: total.toFixed(2) })
+            this.setState({productos:newdata})
+            this.calculate_total(newdata)
             this.show_modal()
+        }else{
+            Swal.fire({
+                title: 'Este articulo ya se encuentra en la lista',
+                text: '¿Cambiar por la nueva cantidad?',
+                icon:'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, Cambiar',
+                cancelButtonText: 'Cancelar'
+
+            }).then(res=>{
+                if(res.isConfirmed){
+                    const newdata = [...this.state.productos]
+                    newdata[index] = item
+                    this.setState({productos:newdata})
+                    this.calculate_total(newdata)
+                    this.show_modal()
+                }
+            })
         }
 
+    }
+    calculate_total=(data)=>{
+        var total = 0
+        for (let value of data) {
+
+            total += parseFloat(value.subtotal)
+        }
+        const igv = (total * 0.18).toFixed(2)
+        const subtotal = (total - igv).toFixed(2)
+
+        this.setState({subtotal: subtotal, igv: igv, total: total.toFixed(2) }) 
     }
     async savePedido(){
         const {dominio} = this.context
@@ -102,7 +153,6 @@ class NewPedido extends Component {
                 body:JSON.stringify(datos)
             })
             const res = await response.json()
-            console.log(res)
             if(res.success){
                 this.props.navigate("/pedidos")
             }else{
@@ -112,12 +162,61 @@ class NewPedido extends Component {
             alert(error)
         }
     }
+    delete_item=(codigo)=>{
+        Swal.fire({
+            title: '¿Estás seguro de eliminar este producto?',
+            text: 'No podrás revertir esto',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+
+        }).then(res=>{
+            if(res.isConfirmed){
+
+                const index = this.state.productos.findIndex(item=>item.codigo===codigo)
+                const newdata = [...this.state.productos]
+                newdata.splice(index,1)
+                this.setState({productos:newdata})
+                this.calculate_total(newdata)
+                Swal.fire('¡Eliminado!','El producto ha sido eliminado','success')
+            }
+        })
+    }
+    add_cantidad=(codigo,stock)=>{
+        const {productos} = this.state
+        const index = productos.findIndex(item=>item.codigo===codigo)
+        const data = productos[index]
+        if(data.cantidad<stock){
+            data.cantidad+=1
+            data.subtotal = (data.cantidad*data.precio).toFixed(2)
+            productos[index] = data
+            this.setState({productos:productos})
+            this.calculate_total(productos)
+        }
+    }
+   sus_cantidad=(codigo)=>{
+        const {productos} = this.state
+        const index = productos.findIndex(item=>item.codigo===codigo)
+        const data = productos[index]
+        if(data.cantidad>1){
+            data.cantidad-=1
+            data.subtotal = (data.cantidad*data.precio).toFixed(2)
+            productos[index] = data
+            this.setState({productos:productos})
+            this.calculate_total(productos)
+
+        }
+    }
+  
     render() {
         const columns = [
             {
                 name: "OPCION",
                 cell: (row) => <FaPlus style={{cursor:'pointer'}} onClick={() => this.select_articulo(row)} />,
-                width: '100px'
+                width: '80px'
             },
             {
                 name: "CODIGO",
@@ -131,21 +230,29 @@ class NewPedido extends Component {
                 width: '400px'
             },
             {
-                name: "STOK",
+                name: "STOCK",
                 selector: row => row.stock,
                 width: '100px'
             },
             {
                 name: "PRECIO",
+                width: '100px',
                 cell: row => (
-                    <div>
-                        S/ {row.precio}
+                    <div style={{width:'100%',display:'flex',justifyContent:'space-between'}}>
+                        <div>S/</div> 
+                        <div>{row.precio.toFixed(2)}</div>
                     </div>
                 ),
-                width: '100px',
             },
         ]
         const columns1 = [
+            {
+                name:"Opcion",
+                width:'80px',
+                cell:row=>(
+                        <FaTrash style={{color:'red',cursor:'pointer'}} onClick={()=>this.delete_item(row.codigo)}/>
+                )
+            },
             {
                 name: 'Codigo',
                 width: '100px',
@@ -158,35 +265,82 @@ class NewPedido extends Component {
             },
             {
                 name: 'Cantidad',
-                width: '100px',
-                selector: row => row.cantidad
-            },
+                width: '80px', 
+                selector: row => row.cantidad,
+                cell: row => (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <div style={{ marginRight: '10px' }}>
+                            {row.cantidad}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <button 
+                            onClick={()=>this.add_cantidad(row.codigo,row.stock)}
+                                style={{ 
+                                    width: '15px', 
+                                    height: '15px', 
+                                    fontSize: '8px', 
+                                    marginBottom: '1px' ,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                +
+                            </button>
+                            <button 
+                                onClick={()=>this.sus_cantidad(row.codigo)}
+
+                                style={{ 
+                                    width: '15px', 
+                                    height: '15px', 
+                                    fontSize: '8px' ,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center'
+                                }}
+                            >
+                                -
+                            </button>
+                        </div>
+                    </div>
+                )
+            }
+            ,            
             {
                 name: 'Sub Total',
                 width: '100px',
-                selector: row => row.subtotal
+                selector: row => row.subtotal,
+                cell:row=>(
+                    <div style={{display:'flex',justifyContent:'space-between',width:'100%'}}>
+                        <div>S/</div>
+                        <div>{row.subtotal}</div>
+                    </div>
+                )
             },
         ]
 
         return (
             <div>
-                <div style={{ display: 'flex', width: '100%', flexWrap: 'wrap',justifyContent:'space-between' }}>
+                <div style={{ display: 'flex',height:'100%', width: '100%', flexWrap: 'wrap',justifyContent:'space-between' }}>
                     <div
                         style={{
-                            width: '60%',
+                            width: '55%',
                             border: '1px solid green',
                             borderRadius: 5,
-                            minWidth: '300px', // Establece un ancho mínimo
-                            marginBottom: '10px', // Margen para la alineación vertical
+                            minHeight:'600px',
+                            minWidth: '300px', 
+                            marginBottom: '10px', 
                         }}
                     >
-                        {/* Tabla de artículos */}
+            
                         <DataTable
                             title="Listado de articulos"
                             columns={columns}
                             data={this.state.data}
                             pagination={true}
                             subHeader={true}
+
+                            noDataComponent={<div>No hay datos para listar</div>}
                             subHeaderComponent={
                                 <div className="header-newpedido" style={{ display: 'flex' }}>
                                     <div>
@@ -212,17 +366,21 @@ class NewPedido extends Component {
 
                     <div
                         style={{
-                            width: '35%',
+                            width: '40%',
+                            minHeight:'50%',
                             border: '1px solid green',
                             borderRadius: 5,
                             padding: 5,
-                            minWidth: '300px', // Establece un ancho mínimo
+                            minWidth: '300px', 
                             marginBottom: '10px',
+                            justifyContent:'space-between',
+                            alignContent:'space-between'
+
                        
                         }}
                     >
-                        {/* Detalle del pedido */}
-                        <div style={{height:'80%'}}>
+                        
+                        <div style={{height:'75%'}}>
                             <DataTable
                                 title="Detalle del Pedido"
                                 pagination={true}
@@ -232,44 +390,48 @@ class NewPedido extends Component {
                         </div>
                         <div
                             style={{
-                                height:'20%',
-                                width: '100%',
+                                height:'25%',
+                                width: '95%',
                                 display: 'flex',
-                                justifyContent: 'flex-end', // Alinea al lado derecho
+                                flexWrap:'wrap',
+                               
+                                justifyContent:'space-between',
+                                alignContent:'flex-end',
+                                alignItems:'flex-end'
                             }}
                         >
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                <div>
+                            
+                                <div style={{width:'45%'}} >
                                     <label>Sub Total</label>
                                     <input
                                         type="number"
-                                        style={{ borderRadius: 3, height: 30, textAlign: 'end',marginLeft:5,marginTop:4 }}
+                                        style={{ borderRadius: 3, height: 30, textAlign: 'end',width:'100%' }}
                                         value={this.state.subtotal}
                                         readOnly
                                     />
                                 </div>
-                                <div>
+                                <div style={{width:'45%'}} >
                                     <label>IGV(18%)</label>
                                     <input
                                         type="number"
-                                        style={{ borderRadius: 3, height: 30, textAlign: 'end',marginLeft:5,marginTop:4 }}
+                                        style={{ borderRadius: 3, height: 30, textAlign: 'end',width:'100%'}}
                                         value={this.state.igv}
                                         readOnly
                                     />
                                 </div>
-                                <div>
+                                <div style={{width:'45%'}} >
                                     <label>Total</label>
                                     <input
                                         type="number"
-                                        style={{ borderRadius: 3, height: 30, textAlign: 'end',marginLeft:5,marginTop:4 }}
+                                        style={{ borderRadius: 3, height: 30, textAlign: 'end',width:'100%',}}
                                         value={this.state.total}
                                         readOnly
                                     />
                                 </div>
-                                <div>
-                                    <button onClick={()=>this.savePedido()} style={{backgroundColor:'#32fa4e',cursor:'pointer'}}>GUARDAR</button>
+                                <div style={{width:'45%'}} >
+                                    <button onClick={()=>this.savePedido()} style={{backgroundColor:'#32fa4e',border:'0',height:30,marginLeft:10,marginTop:20,width:'100%',cursor:'pointer',color:'black',borderRadius:5}}>GUARDAR</button>
                                 </div>
-                            </div>
+                          
                         </div>
 
                     </div>
@@ -278,7 +440,8 @@ class NewPedido extends Component {
                     visible={this.state.visible}
                     showModal={this.show_modal}
                     data={this.state.item}
-                    saveData={this.save_data}
+                    addData={this.add_data}
+                    image={this.state.image}
                 />
             </div>
 

@@ -4,6 +4,7 @@ import { withRouter } from "./Router";
 import { Route, Routes } from "react-router-dom";
 import Pedido from "../views/pedidos/Pedido";
 import NewPedido from "../views/pedidos/newpedido";
+import Page404 from "./Page404";
 class Content extends Component{
     static contextType = Context
     constructor(props){
@@ -16,8 +17,7 @@ class Content extends Component{
 
                     <Route path="/pedidos"  element={<Pedido/>}/>
                     <Route path="/pedidos/add"  element={<NewPedido/>}/>
-
-
+                    <Route path="/*" element={<Page404/>}/>
                 </Routes>
             </div>
         )

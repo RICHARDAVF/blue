@@ -57,25 +57,44 @@ class Pedido extends Component{
             },
             {
                 name:"Cliente",
+                width:'200px',
                 selector:row=>row.cliente
             },
             {
                 name:"Sub Total",
-                selector:row=>row.subtotal
+                selector:row=>row.subtotal,
+                cell:row=>(
+                    <div style={{width:'100%',display:'flex',justifyContent:'end'}}>
+                        <span>{row.subtotal}</span>
+                    </div>
+                ),
+                
             },
             {
                 name:"IGV",
-                selector:row=>row.igv
+                selector:row=>row.igv,
+                cell:row=>(
+                    <div style={{width:'100%',display:'flex',justifyContent:'end'}}>
+                        <span>{row.igv}</span>
+                    </div>
+                ),
+                
             },
             {
                 name:"Total",
-                selector:row=>row.total
+                selector:row=>row.total,
+                cell:row=>(
+                    <div style={{width:'100%',display:'flex',justifyContent:'end'}}>
+                        <span>{row.total}</span>
+                    </div>
+                ),
+                
             },
             {
                 name:"ESTADO",
                 cell:(row)=>
                     
-                    <div style={{backgroundColor:row.estado=='APROBADO'?'#33E40C':row.estado=='ANULADO'?'#E40C25':row.estado=='RECHAZADO'?'#E47C0C':'#FAB46E',width:100,textAlign:'center',borderRadius:3}}>
+                    <div style={{backgroundColor:row.estado==='APROBADO'?'#33E40C':row.estado==='ANULADO'?'#E40C25':row.estado==='RECHAZADO'?'#E47C0C':'#FAB46E',width:100,textAlign:'center',borderRadius:3}}>
                         {row.estado}
                     </div>
                 
@@ -91,6 +110,9 @@ class Pedido extends Component{
                 data={this.state.data}
                 pagination={true}
                 subHeader={true}
+                noDataComponent="No hay datos para mostrar"
+                noHeader={false}
+                noTableHead={false}
                 subHeaderComponent={
                     <div className="header-container">
                         <button className="register-button" onClick={()=>this.props.navigate("/pedidos/add")}>Nuevo Pedido</button>

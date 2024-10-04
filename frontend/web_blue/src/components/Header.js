@@ -2,7 +2,7 @@ import { Component } from "react";
 import { Context } from "./GlobalContext";
 import {GiHamburgerMenu} from 'react-icons/gi'
 import { withRouter } from "./Router";
-
+import Swal from "sweetalert2";
 class Header extends Component{
     static contextType = Context
     constructor(props){
@@ -15,10 +15,24 @@ class Header extends Component{
         this.setState({showmenu:!this.state.showmenu})
     }
     logout(){
-        localStorage.removeItem("user")
-        localStorage.setItem("login",false)
-        this.context.updateState({login:false})
-        this.props.navigate("/")
+        Swal.fire({
+          
+            text:'¿Esta seguro que desea salir?',
+            icon:'warning',
+            showCancelButton:true,
+            confirmButtonColor:'#3085d6',
+            cancelButtonColor:'#d33',
+            confirmButtonText:'Si',
+            cancelButtonText:'No',
+
+        }).then(res=>{
+            if(res.isConfirmed){
+                localStorage.removeItem("user")
+                localStorage.removeItem("login")
+                this.context.updateState({login:false})
+                this.props.navigate("/")
+            }
+        })
     }
     render(){
         return(
@@ -31,8 +45,8 @@ class Header extends Component{
                     {
                         this.state.showmenu && (
                             <div style={styles.dropdownMenu}>
-                                <p><stron>Cliente:{this.context.usuario.razon_social}</stron></p>
-                                <p><stron>Codigo:{this.context.usuario.codigo}</stron></p>
+                                <p><strong>Cliente:{this.context.usuario.razon_social}</strong></p>
+                                <p><strong>Codigo:{this.context.usuario.codigo}</strong></p>
                                 <button onClick={()=>this.logout()} style={styles.logoutButton}>Salir</button>
                             </div> 
                         )

@@ -7,7 +7,8 @@ class Provider extends Component{
         this.state = {
             login:false,
             shownav:false,
-            dominio:'http://192.168.0.100:8000',
+            // dominio:'http://192.168.0.100:8000',
+            dominio:'http://192.168.1.12:8000',
             usuario :{
                 
             }

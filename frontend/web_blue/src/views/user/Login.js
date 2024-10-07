@@ -44,7 +44,8 @@ class Login extends Component {
           inputPlaceholder:'Ingrese su documento',
           showCancelButton:true
         }).then(resp=>{
-          if(resp.isConfirmed){
+
+          if(resp.isConfirmed && resp.value.length>0){
             fetch(url+'cliente/',{
               method:'POST',
               headers:{
@@ -54,11 +55,13 @@ class Login extends Component {
             }).then(response=>{
               return response.json()
             }).then(response=>{
+
+
               if(response.success){
                 this.handle_login({...res,...response})
               }else{
                 Swal.fire({
-                  text:"Usuario o contraseña incorrecta"
+                  text:"Documento, Usuario o Contraseña incorrecta"
                 })
               }
             })
@@ -66,13 +69,13 @@ class Login extends Component {
         })
       }else{
         Swal.fire({
-          text:"Usuario o contraseña incorrecta"
+          text:"Documento, Usuario o contraseña incorrecta"
         })
 
       }
     }catch(error){
       Swal.fire({
-        text:"Usuario o contraseña incorrecta"
+        text:"Documento, Usuario o contraseña incorrecta"
       })
     }
   }
@@ -127,6 +130,9 @@ class Login extends Component {
             />
           </div>
           <button type="submit" className="login-button">Iniciar Sesión</button>
+          <div style={{color:'black'}}>
+            <p>¿Aun no tienes una cuenta? <a style={{cursor:'pointer',color:'blue'}} href='/register'>Regístrate</a></p>
+          </div>
           
         </form>
       </div>

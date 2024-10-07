@@ -1,45 +1,126 @@
 import React, { Component } from 'react';
 import '../../styles/Register.css';
-
+import Swal from 'sweetalert2'
+import { Context } from '../../components/GlobalContext';
+import { withRouter } from '../../components/Router';
 class RegisterForm extends Component {
+  static contextType = Context
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
+      document_proveedor:'',
+      username_proveedor:'',
       documento: '',
       nombre: '',
       apellido: '',
       email: '',
       telefono: '',
-      password: ''
+      password: '',
+      document_validate:false
     };
   }
-  async validateDocument(){
-    const tipo = this.state.documento.length==8?'dni':'ruc'
-    const url = `http://noisystems.dyndns.org:3030/api/search/${tipo}/${this.state.documento}/`
+  async validateDocument() {
+    const { documento } = this.state;
+  
+    
+    const tipo = documento.length === 8 ? 'dni' : 'ruc';
+    const url = `http://noisystems.dyndns.org:3030/api/searchdoc/${documento}/${tipo}/`;
+
+   
+    Swal.fire({
+      title: 'Validando documento...',
+      text: 'Por favor espera mientras validamos tu documento.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading(); 
+      },
+      backdrop: 'rgba(0, 0, 0, 0.5)',
+    });
     try{
-        const response = await fetch(url,{
-            method: 'GET',
-            headers:{
-                'Content-Type': 'application/json',
-            }
+
+      const response = await fetch(url,{
+        method:'GET'
+      })
+      const res = await response.json()
+      if(res.success && res.data){
+        this.setState({document_validate:true})
+        Swal.close()
+        Swal.fire({
+          title:"Success",
+          text:"Documentos válidos"
         })
-        const res = await response.json()
-        console.log(res)
+      }else{
+
+        Swal.close()
+        Swal.fire({
+          title:"Error",
+          text:res.error
+        })
+      }
     }catch(error){
-        console.log(error)
+      Swal.close()
+      Swal.fire({
+        title:"Error",
+        text:error.toString()
+      })
     }
   }
+  
+  
   handleChange = (e) => {
-    if(e.target.name==='documento' && e.key=='enter'){
-        console.log(e)
-    }
+
     this.setState({ [e.target.name]: e.target.value });
   };
 
-  handleSubmit = (e) => {
+  handleSubmit = async(e) => {
     e.preventDefault();
-    // Lógica para procesar los datos
-    console.log('Datos del formulario:', this.state);
+    if(!this.state.document_validate){
+      return Swal.fire({
+        title:"Alerta",
+        text:"Validar el documento",
+        icon:'warning'
+      })
+    }
+    try{
+      const {dominio} = this.context
+      const url = `${dominio}/api/v1/create/cliente/` 
+      const datos = {...this.state} 
+      const response = await fetch(url,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(datos)
+      })
+
+      const res = await response.json()
+      if(res.success){
+        Swal.fire({
+          title:"Success",
+          text:"Su cuenta fue creada exitosamente",
+          icon:'success',
+          allowOutsideClick: false, 
+          allowEscapeKey: false
+        }).then(res=>{
+          if(res.isConfirmed){
+            this.props.navigate("/")
+          }
+        })
+      }else{
+        Swal.fire({
+          title:"Error",
+          text:res.error,
+          icon:'error'
+        })
+      }
+    }catch(error){
+      Swal.fire({
+        title:"Error",
+        text:error.toString(),
+        icon:'error'
+      })
+    }
   };
 
   render() {
@@ -50,7 +131,34 @@ class RegisterForm extends Component {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Documento</label>
+              <label>Documento del proveedor</label>
+              <input
+                type="text"
+                name="document_proveedor"
+                value={this.state.document_proveedor}
+                onChange={this.handleChange}
+                required
+                placeholder="Ingresa el documento"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Usuario del proveedor</label>
+              <input
+                type="text"
+                name="username_proveedor"
+                value={this.state.username_proveedor}
+                onChange={this.handleChange}
+                required
+                placeholder="Ingresa el usuario"
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+            <label>Documento (Presione Enter para validar)</label>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <input
                 type="text"
                 name="documento"
@@ -58,8 +166,25 @@ class RegisterForm extends Component {
                 onChange={this.handleChange}
                 required
                 placeholder="Ingresa tu documento"
+                style={{ marginRight: '10px' }} 
               />
+              <button
+              onClick={()=>this.validateDocument()}
+                type="button"
+                style={{
+                  height: 30,
+                  border: 0,
+                  marginTop: 1,
+                  cursor: 'pointer',
+                  background: '#48d4ab',
+                  borderRadius: 5,
+                }}
+              >
+                VALIDAR
+              </button>
             </div>
+          </div>
+
 
             <div className="form-group">
               <label>Nombre</label>
@@ -119,6 +244,7 @@ class RegisterForm extends Component {
               <input
                 type="password"
                 name="password"
+                maxLength={8}
                 value={this.state.password}
                 onChange={this.handleChange}
                 required
@@ -126,12 +252,14 @@ class RegisterForm extends Component {
               />
             </div>
           </div>
-
-          <button type="submit" className="submit-btn">Registrarse</button>
+          <button  type="submit" className="submit-btn">Registrarse</button>
+          <div style={{color:'black'}}>
+            <p>¿Ya tienes una cuenta? <a style={{color:'blue'}} href='/'>Iniciar Sesión</a></p>
+          </div>
         </form>
       </div>
     );
   }
 }
 
-export default RegisterForm;
+export default withRouter(RegisterForm);

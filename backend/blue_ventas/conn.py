@@ -37,7 +37,8 @@ class CAQ:
             if data is None:
                 data = {"success":True,"data":[]}
             else:
-                data = {"success":True,"data":data}
+                if method=='GET':
+                    data = {"success":True,"data":data}
             conn.commit()
             conn.close()
         except Exception as e:

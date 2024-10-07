@@ -8,9 +8,9 @@ class LoginView(GenericAPIView):
         datos = request.data
         try:
             sql = f"""
-                SELECT aux_user_i,aux_pass_i,aux_clave,aux_docum,aux_razon,aux_direcc,aux_userci FROM t_auxiliar WHERE aux_pass_i=? AND aux_user_i=? OR aux_userci=?
+                SELECT aux_user_i,aux_pass_i,aux_clave,aux_docum,aux_razon,aux_direcc,aux_userci,ofi_codigo FROM t_auxiliar WHERE aux_docum=? AND aux_pass_i=? AND aux_user_i=? OR aux_userci=?
 """
-            params = (datos["password"],datos["username"],datos['password'])
+            params = (datos["documento"],datos["password"],datos["username"],datos['password'])
             res = CAQ.query(sql,params,'GET',0)
 
             if res["success"] and len(res["data"])==0:
@@ -25,7 +25,8 @@ class LoginView(GenericAPIView):
                 "documento":result[3].strip(),
                 "razon_social":result[4].strip(),
                 "direccion":result[5].strip(),
-                "tipo_user":tipo_user
+                "tipo_user":tipo_user,
+                "familia":result[6].strip()
             }
         except Exception as e:
             data["error"] = f"Ocurrio un error: {str(e)}"
@@ -35,7 +36,7 @@ class LoginCliente(GenericAPIView):
         data = {}
         datos = request.data
         try:
-            sql = "SELECT aux_razon,aux_direcc,aux_docum,aux_clave FROM t_auxiliar WHERE aux_docum=?"
+            sql = "SELECT aux_razon,aux_direcc,aux_docum,aux_clave,ofi_codigo FROM t_auxiliar WHERE aux_docum=?"
             res = CAQ.query(sql,(datos['documento'],),'GET',0)
             if res["success"] and len(res["data"])==0:
                 raise ValueError("No esta resgistrado")
@@ -45,7 +46,8 @@ class LoginCliente(GenericAPIView):
                 "razon_social":result[0].strip(),
                 "direccion":result[1].strip(),
                 "documento":result[2].strip(),
-                "codigo":result[3].strip()
+                "codigo":result[3].strip(),
+                "familia":result[4].strip()
 
             }
         except Exception as e:

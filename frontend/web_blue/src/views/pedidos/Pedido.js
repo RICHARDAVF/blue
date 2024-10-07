@@ -18,9 +18,10 @@ class Pedido extends Component{
     async requestPedidos(){
         const {dominio} = this.context
         const url = `${dominio}/api/v1/pedidos/list/`
-        const usercodigo = this.context.usuario.codigo
+        const {codigo,tipo_user} = this.context.usuario
         const datos = {
-            "codigo":usercodigo
+            "codigo":codigo,
+            "tipo_user":tipo_user
         }
         try{
             const response = await fetch(url,{
@@ -32,8 +33,9 @@ class Pedido extends Component{
             })
             if(response.ok){
                 const res = await response.json()
+
                 if(res.error){
-                    return alert("Error:",res.error)
+                    return alert(res.error)
                 }
                 this.setState({data:res})
             }

@@ -339,8 +339,7 @@ class NewPedido extends Component {
                             data={this.state.data}
                             pagination={true}
                             subHeader={true}
-
-                            noDataComponent={<div>No hay datos para listar</div>}
+                            noDataComponent="No hay datos para mostrar"
                             subHeaderComponent={
                                 <div className="header-newpedido" style={{ display: 'flex' }}>
                                     <div>

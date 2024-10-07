@@ -6,6 +6,11 @@ class PedidoView(GenericAPIView):
     def post(self,request,*args,**kwargs):
         data = {}
         datos = request.data
+        if datos["tipo_user"]==1:
+            filters = f"AND b.ofi_codigo='{datos["familia"]}' "
+        else:
+            filters = f"AND b.aux_clave='{datos["codigo"]}' "
+        print(filters)
         try:
             sql = f"""
                 SELECT 
@@ -23,12 +28,13 @@ class PedidoView(GenericAPIView):
                 FROM cabepedido AS a 
                 INNER JOIN t_auxiliar AS b ON a.MOV_CODAUX = b.aux_clave 
                 WHERE 
-                    a.ped_cierre=0 AND a.elimini=0
-                    AND a.mov_codaux=?
+                    a.ped_cierre=0 
+                    AND a.elimini=0
+                    {filters}
                 ORDER BY MOV_COMPRO DESC
             """
             res = CAQ.query(sql,(datos["codigo"],),'GET',1)
-            if res["success"] and len(res["data"])>0:
+            if res["success"] and len(res["data"])>=0:
                 data = [
                     {
                         'id':index,

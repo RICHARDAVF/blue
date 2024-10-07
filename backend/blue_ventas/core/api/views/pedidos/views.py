@@ -9,8 +9,8 @@ class PedidoView(GenericAPIView):
         if datos["tipo_user"]==1:
             filters = f"""AND b.ofi_codigo='{datos["familia"]}' """
         else:
-            filters = f"""AND b.aux_clave='{datos["codigo"]}' """
-        print(filters)
+            filters = f"""AND a.mov_codaux='{datos["codigo"]}' """
+
         try:
             sql = f"""
                 SELECT 
@@ -33,7 +33,7 @@ class PedidoView(GenericAPIView):
                     {filters}
                 ORDER BY MOV_COMPRO DESC
             """
-            res = CAQ.query(sql,(datos["codigo"],),'GET',1)
+            res = CAQ.query(sql,(),'GET',1)
             if res["success"] and len(res["data"])>=0:
                 data = [
                     {

@@ -7,9 +7,9 @@ class PedidoView(GenericAPIView):
         data = {}
         datos = request.data
         if datos["tipo_user"]==1:
-            filters = f"AND b.ofi_codigo='{datos["familia"]}' "
+            filters = f"""AND b.ofi_codigo='{datos["familia"]}' """
         else:
-            filters = f"AND b.aux_clave='{datos["codigo"]}' "
+            filters = f"""AND b.aux_clave='{datos["codigo"]}' """
         print(filters)
         try:
             sql = f"""

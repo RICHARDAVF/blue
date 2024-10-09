@@ -15,17 +15,16 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
-from blue_ventas.core.login.views import LoginView,LoginCliente
+from django.urls import path,include, re_path
+
 from blue_ventas.views import index
 from django.conf import settings
 from django.contrib.staticfiles.urls import static
+from django.views.generic import TemplateView
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index),
     path('api/',include("blue_ventas.core.api.urls")),
-    path('login/',LoginView.as_view()),
-    path('login/cliente/',LoginCliente.as_view()),
+    re_path(r'^(?:.*)/?$', TemplateView.as_view(template_name='index.html')),
 
 ]
 urlpatterns+=static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)

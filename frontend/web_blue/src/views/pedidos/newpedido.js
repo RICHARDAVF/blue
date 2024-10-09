@@ -15,7 +15,7 @@ class NewPedido extends Component {
             visible: false,
             item: {},
             productos: [],
-            subtotal: 0.00,
+            base_imponible: 0.00,
             igv: 0.00,
             total: 0.00,
             image:null
@@ -129,10 +129,10 @@ class NewPedido extends Component {
 
             total += parseFloat(value.subtotal)
         }
-        const igv = (total * 0.18).toFixed(2)
-        const subtotal = (total - igv).toFixed(2)
+        const base_imponible = (total/ 1.18).toFixed(2)
+        const igv = (total - base_imponible).toFixed(2)
 
-        this.setState({subtotal: subtotal, igv: igv, total: total.toFixed(2) }) 
+        this.setState({base_imponible: base_imponible, igv: igv, total: total.toFixed(2) }) 
     }
     async savePedido(){
         const {dominio} = this.context
@@ -141,8 +141,8 @@ class NewPedido extends Component {
             ...this.context.usuario,
             items:this.state.productos,
             "total":this.state.total,
-            "subtotal":this.state.subtotal,
-            "igv":this.state.igv
+            "base_imponible":this.state.base_imponible,
+            "igv":this.state.igv,
         }
         try{
             const response = await fetch(url,{
@@ -189,9 +189,9 @@ class NewPedido extends Component {
         const {productos} = this.state
         const index = productos.findIndex(item=>item.codigo===codigo)
         const data = productos[index]
-        if(data.cantidad<stock){
-            data.cantidad+=1
-            data.subtotal = (data.cantidad*data.precio).toFixed(2)
+        if(parseFloat(data.cantidad)<stock){
+            data.cantidad=parseInt(data.cantidad)+1
+            data.subtotal = (data.cantidad*parseFloat(data.precio)).toFixed(2)
             productos[index] = data
             this.setState({productos:productos})
             this.calculate_total(productos)
@@ -201,9 +201,9 @@ class NewPedido extends Component {
         const {productos} = this.state
         const index = productos.findIndex(item=>item.codigo===codigo)
         const data = productos[index]
-        if(data.cantidad>1){
-            data.cantidad-=1
-            data.subtotal = (data.cantidad*data.precio).toFixed(2)
+        if(parseInt(data.cantidad)>1){
+            data.cantidad=parseInt(data.cantidad)-1
+            data.subtotal = (data.cantidad*parseFloat(data.precio)).toFixed(2)
             productos[index] = data
             this.setState({productos:productos})
             this.calculate_total(productos)
@@ -401,11 +401,11 @@ class NewPedido extends Component {
                         >
                             
                                 <div style={{width:'45%'}} >
-                                    <label>Sub Total</label>
+                                    <label>Base Imponible</label>
                                     <input
                                         type="number"
                                         style={{ borderRadius: 3, height: 30, textAlign: 'end',width:'100%' }}
-                                        value={this.state.subtotal}
+                                        value={this.state.base_imponible}
                                         readOnly
                                     />
                                 </div>

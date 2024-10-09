@@ -8,7 +8,9 @@ class Pedido extends Component{
     constructor(props){
         super(props)
         this.state = {
-            data:[]
+            data:[],
+            dataCopy:[],
+            palabra:''
         }  
     }
     componentDidMount(){
@@ -18,10 +20,11 @@ class Pedido extends Component{
     async requestPedidos(){
         const {dominio} = this.context
         const url = `${dominio}/api/v1/pedidos/list/`
-        const {codigo,tipo_user} = this.context.usuario
+        const {codigo,tipo_user,familia} = this.context.usuario
         const datos = {
             "codigo":codigo,
-            "tipo_user":tipo_user
+            "tipo_user":tipo_user,
+            "familia":familia
         }
         try{
             const response = await fetch(url,{
@@ -37,11 +40,18 @@ class Pedido extends Component{
                 if(res.error){
                     return alert(res.error)
                 }
-                this.setState({data:res})
+                this.setState({data:res,dataCopy:res})
             }
         }catch(error){
-            console.log(error)
+           
         }
+    }
+    buscador=(cadena)=>{
+        const {dataCopy} = this.state
+        const res = dataCopy.filter(item=>{
+            return item.cliente.includes(cadena) || item.numero_pedido.includes(cadena) || item.documento.includes(cadena)
+        })
+        this.setState({data:res,palabra:cadena})
     }
     render(){
         const columns = [
@@ -122,6 +132,8 @@ class Pedido extends Component{
                             <input
                                 type="text"
                                 placeholder="Buscar..."
+                                value={this.state.palabra}
+                                onChange={e=>this.buscador(e.target.value.toUpperCase()||'')}
                                 className="search-input"
                             />
                         </div>

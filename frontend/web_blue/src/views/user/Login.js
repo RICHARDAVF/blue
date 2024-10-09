@@ -24,7 +24,7 @@ class Login extends Component {
   }
   async login(data){
     const {dominio} = this.context
-    const url = `${dominio}/login/`
+    const url = `${dominio}/api/v1/login/`
     try{
 
       const response = await fetch(url,{

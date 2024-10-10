@@ -81,20 +81,38 @@ class NewPedido extends Component {
         }
     }
     select_articulo = (row) => {
-        this.requestImage(row.codigo)
-        const index = this.state.productos.findIndex(value=>value.codigo==row.codigo)
+        const index = this.state.productos.findIndex(value=>value.codigo===row.codigo)
         var message = "AÑADIR AL PEDIDO"
         var cantidad = 1 
         var subtotal = row.precio
         if(index!==-1){
-            message = "EDITAR"
-            cantidad = this.state.productos[index].cantidad
-            subtotal = this.state.productos[index].subtotal
+            Swal.fire({
+                title:"Alerta",
+                text:"El articulo ya esta añadido, ¿Desea ver la imagen?",
+                confirmButtonText:'Si',
+                cancelButtonText:'Cancelar',
+                showCancelButton:true,
+                showConfirmButton:true
+            }).then(res=>{
+                if(res.isConfirmed){
+                    this.requestImage(row.codigo)
+                    message = "EDITAR"
+                    cantidad = this.state.productos[index].cantidad
+                    subtotal = this.state.productos[index].subtotal
+                    const data = {...row,cantidad:cantidad,descuento:0,subtotal:subtotal}
+                    this.setState({ item: data,text_button_add:message })
+                    this.show_modal()
+
+                }
+                
+            })
+        }else{
+            const data = {...row,cantidad:cantidad,descuento:0,subtotal:subtotal}
+            this.setState({ item: data,text_button_add:message })
+            this.show_modal()
         }
-        const data = {...row,cantidad:cantidad,descuento:0,subtotal:subtotal}
-        this.setState({ item: data,text_button_add:message })
-        this.show_modal()
     }
+
     buscador(palabra) {
         this.setState({ palabra: palabra })
         if (palabra.length > 0) {
@@ -443,14 +461,17 @@ class NewPedido extends Component {
 
                     </div>
                 </div>
-                <Modal
-                    visible={this.state.visible}
-                    showModal={this.show_modal}
-                    data={this.state.item}
-                    addData={this.add_data}
-                    image={this.state.image}
-                    text_button_add = {this.state.text_button_add}
-                />
+                {
+                    this.state.visible && 
+                    <Modal
+                        visible={this.state.visible}
+                        showModal={this.show_modal}
+                        data={this.state.item}
+                        addData={this.add_data}
+                        image={this.state.image}
+                        text_button_add = {this.state.text_button_add}
+                    />
+                }
             </div>
 
         )

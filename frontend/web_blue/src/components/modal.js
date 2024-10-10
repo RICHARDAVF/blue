@@ -5,26 +5,33 @@ class Modal extends Component {
         super(props)
         this.state = {
             cantidad:1,
-            subtotal:this.props.data.subtotal || 0
+            subtotal:0 
 
         }
     }
-
+    
+    componentDidMount(){
+        this.setState({
+            cantidad:this.props.data.cantidad,
+            subtotal:this.props.data.subtotal,
+        })
+    }
+    updateData(){
+        this.setState({cantidad:this.props.data.cantidad,subtotal:this.props.data.subtotal})
+    }
     change_cantidad=(value)=>{
         var subtotal = parseFloat(value*this.props.data.precio).toFixed(2)
         this.setState({subtotal:subtotal,cantidad:value})
     }
     add_data=()=>{
         const {data} = this.props
-        data.subtotal = this.state.subtotal===0?this.props.data.subtotal:this.state.subtotal
+        data.subtotal = this.state.subtotal
         data.cantidad = this.state.cantidad
         this.props.addData(data)
         this.setState({cantidad:1,subtotal:0})
     }
     render() {
 
-        const subtotal = this.state.subtotal===0?this.props.data.precio:this.state.subtotal
-        if(!this.props.visible) return null
         return (
             <div className="modal-overlay">
                 <div className="modal-content" >
@@ -47,7 +54,7 @@ class Modal extends Component {
                             </div>
                             <div className='input-group'>
                                 <label htmlFor='cantidad'>Sub Total</label>
-                                <input type='number' value={subtotal} readOnly />
+                                <input type='number' value={this.state.subtotal} readOnly />
                             </div>
                         </div>
                         <div style={{width:'50%',display:'flex',justifyContent:'center',alignContent:'center',alignItems:'center'}}>

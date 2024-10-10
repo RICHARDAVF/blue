@@ -20,12 +20,13 @@ class LoginView(GenericAPIView):
                     ven_codigo 
                 FROM t_auxiliar WHERE aux_docum=? AND aux_user_i=? AND (aux_pass_i=? OR aux_userci=?)
 """
-            params = (datos["documento"],datos["username"],datos["password"],datos['password'])
+            password = datos["password"].upper()
+            params = (datos["documento"],datos["username"],password,password)
             res = CAQ.query(sql,params,'GET',0)
             if res["success"] and len(res["data"])==0:
                 raise ValueError("Usuario o contraseña incorrecta")
             result = res["data"]
-            tipo_user = 1 if result[1].strip()==datos['password'].strip() else 0
+            tipo_user = 1 if result[1].strip()==password.strip() else 0
             data = {
                 "success":True,
                 "username":result[0].strip(),
@@ -79,12 +80,15 @@ class LoginCliente(GenericAPIView):
             document:Documento del cliente.
            
         """
+
         try:
             sql = "SELECT ofi_codigo FROM t_auxiliar WHERE aux_docum=?"
             res = CAQ.query(sql,(document,),"GET",0)
-            if  res["success"] and len(res["data"])>0:
-                sql = "UPDATE t_auxiliar SET ofi_codigo=? WHERE aux_codigo=? "
-                res = CAQ.query(sql,(family,document))
+
+            if  res["success"] and len(res["data"][0].strip())==0:
+          
+                sql = "UPDATE t_auxiliar SET ofi_codigo=? WHERE aux_docum=? "
+                res = CAQ.query(sql,(family,document),"POST")
                 if not res["success"]:
                     raise ValueError(res["error"])
             return True

@@ -6,10 +6,10 @@ class PedidoView(GenericAPIView):
     def post(self,request,*args,**kwargs):
         data = {}
         datos = request.data
-        if datos["tipo_user"]==1:
-            filters = f"""AND (b.ofi_codigo='{datos["familia"]}' OR a.mov_codaux='{datos["codigo"]}') """
-        else:
+        if datos["view"]==1:
             filters = f"""AND a.mov_codaux='{datos["codigo"]}' """
+        else:
+            filters = f"""AND b.ofi_codigo='{datos["familia"]}' AND a.mov_codaux<>'{datos["codigo"]}' """
 
         try:
             sql = f"""

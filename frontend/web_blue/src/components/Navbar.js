@@ -1,7 +1,9 @@
 import { Component } from "react";
 import code from './code.png'
 import { Link } from "react-router-dom";
+import { Context } from "./GlobalContext";
 class NavBar extends Component{
+    static contextType = Context
     constructor(props){
         super(props)
         
@@ -13,9 +15,17 @@ class NavBar extends Component{
                 <ul>
                     <li>
                         <Link to='/pedidos'>
-                            Pedidos
+                            Mis Pedidos
                         </Link>
                     </li>
+                    {
+                        this.context.usuario.tipo_user==1 && 
+                    <li>
+                        <Link to='/pedidos/client'>
+                            Pedido de clientes
+                        </Link>
+                    </li>
+                    }
                 </ul>
 
                 

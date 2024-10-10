@@ -3,7 +3,7 @@ import { withRouter } from "../../components/Router";
 import DataTable from 'react-data-table-component';
 import { Context } from "../../components/GlobalContext";
 
-class Pedido extends Component{
+class PedidoClient extends Component{
     static contextType = Context
     constructor(props){
         super(props)
@@ -23,10 +23,11 @@ class Pedido extends Component{
         const {codigo,tipo_user,familia} = this.context.usuario
         const datos = {
             "codigo":codigo,
-            "tipo_user":tipo_user,
             "familia":familia,
-            "view":1
+            "tipo_user":tipo_user,
+            "view":2
         }
+
         try{
             const response = await fetch(url,{
                 method:'POST',
@@ -122,7 +123,7 @@ class Pedido extends Component{
         return(
             <div className="data">
                 <DataTable
-                title="Listado de pedidos"
+                title="Listado de mis clientes"
                 columns={columns}
                 data={this.state.data}
                 pagination={true}
@@ -131,9 +132,7 @@ class Pedido extends Component{
                 noHeader={false}
                 noTableHead={false}
                 subHeaderComponent={
-                    <div className="header-container">
-                        <button className="register-button" onClick={()=>this.props.navigate("/pedidos/add")}>Nuevo Pedido</button>
-                        <div className="search-container">
+                  
                             <input
                                 type="text"
                                 placeholder="Buscar..."
@@ -141,12 +140,11 @@ class Pedido extends Component{
                                 onChange={e=>this.buscador(e.target.value.toUpperCase()||'')}
                                 className="search-input"
                             />
-                        </div>
-                    </div>
+                      
                 }
                 />
             </div>
         )
     }
 }
-export default withRouter(Pedido)
+export default withRouter(PedidoClient)

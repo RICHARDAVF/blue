@@ -22,7 +22,7 @@ class Modal extends Component {
         this.setState({cantidad:1,subtotal:0})
     }
     render() {
-        console.log(this.props.image)
+
         const subtotal = this.state.subtotal===0?this.props.data.precio:this.state.subtotal
         if(!this.props.visible) return null
         return (
@@ -67,7 +67,7 @@ class Modal extends Component {
                             borderRadius:5,
                             color:'white',
                             backgroundColor:'blue'
-                        }} >AÑADIR AL PEDIDO</button>
+                        }} >{this.props.text_button_add}</button>
                         <button 
                         onClick={()=>this.props.showModal()}
                         style={{

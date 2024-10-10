@@ -76,7 +76,12 @@ const styles = {
         color: '#000',
         border: '1px solid',
         borderRadius: '4px',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        maxWidth:200,
+        whiteSpace:'nowrap',
+        overflow:'hidden',
+        textOverflow:'ellipsis'
+        
     },
     dropdownMenu: {
         position: 'absolute',
@@ -87,8 +92,8 @@ const styles = {
         padding: '10px',
         zIndex: 1,
         borderRadius: '4px',
-        minWidth: '250px', 
-        whiteSpace: 'nowrap'  
+        minWidth: '330px', 
+        // whiteSpace: 'nowrap'  
     },
     logoutButton: {
         padding: '6px 12px',

@@ -8,9 +8,10 @@ class Provider extends Component{
             login:false,
             shownav:false,
             //dominio:'http://192.168.1.12:8000',
-             dominio:'http://192.168.1.12:3030',
-            // dominio:'http://192.168.0.105:8000',
+            //  dominio:'http://192.168.1.12:3030',
+            dominio:'http://192.168.0.105:8000',
             // dominio:'http://192.168.1.12:80',
+            documento_proveedor:'',
             usuario :{
                 
             }

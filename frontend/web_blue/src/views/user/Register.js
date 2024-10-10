@@ -12,12 +12,23 @@ class RegisterForm extends Component {
       username_proveedor:'',
       documento: '',
       nombre: '',
-      apellido: '',
+      direccion:'',
       email: '',
       telefono: '',
       password: '',
       document_validate:false
     };
+  }
+  componentDidMount(){
+    this.setState({document_proveedor:this.context.documento_proveedor})
+  }
+  procces_data=(data)=>{
+
+      this.setState({
+        "nombre":data.nombre_completo || data.nombre_o_razon_social,
+        "direccion":data.direccion
+      })
+    
   }
   async validateDocument() {
     const { documento } = this.state;
@@ -43,8 +54,10 @@ class RegisterForm extends Component {
         method:'GET'
       })
       const res = await response.json()
+
       if(res.success && res.data){
         this.setState({document_validate:true})
+        this.procces_data(res.data)
         Swal.close()
         Swal.fire({
           title:"Success",
@@ -131,34 +144,8 @@ class RegisterForm extends Component {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Documento del proveedor</label>
-              <input
-                type="text"
-                name="document_proveedor"
-                value={this.state.document_proveedor}
-                onChange={this.handleChange}
-                required
-                placeholder="Ingresa el documento"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Usuario del proveedor</label>
-              <input
-                type="text"
-                name="username_proveedor"
-                value={this.state.username_proveedor}
-                onChange={this.handleChange}
-                required
-                placeholder="Ingresa el usuario"
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-            <label>Documento (Presione Enter para validar)</label>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <label>Documento</label>
+            
               <input
                 type="text"
                 name="documento"
@@ -168,26 +155,13 @@ class RegisterForm extends Component {
                 placeholder="Ingresa tu documento"
                 style={{ marginRight: '10px' }} 
               />
-              <button
-              onClick={()=>this.validateDocument()}
-                type="button"
-                style={{
-                  height: 30,
-                  border: 0,
-                  marginTop: 1,
-                  cursor: 'pointer',
-                  background: '#48d4ab',
-                  borderRadius: 5,
-                }}
-              >
-                VALIDAR
-              </button>
-            </div>
+              
+   
           </div>
 
 
             <div className="form-group">
-              <label>Nombre</label>
+              <label>Nombre completo</label>
               <input
                 type="text"
                 name="nombre"
@@ -195,24 +169,25 @@ class RegisterForm extends Component {
                 onChange={this.handleChange}
                 
                 required
-                placeholder="Ingresa tu nombre"
+                placeholder="Ingresa tu nombre completo"
               />
             </div>
           </div>
 
           <div className="form-row">
+            
+
             <div className="form-group">
-              <label>Apellido</label>
+              <label>Direccion</label>
               <input
                 type="text"
-                name="apellido"
-                value={this.state.apellido}
+                name="direccion"
+                value={this.state.direccion}
                 onChange={this.handleChange}
                 required
-                placeholder="Ingresa tu apellido"
+                placeholder="Ingresa tu direccion"
               />
             </div>
-
             <div className="form-group">
               <label>Email</label>
               <input
@@ -238,24 +213,26 @@ class RegisterForm extends Component {
                 placeholder="Ingresa tu teléfono"
               />
             </div>
-
             <div className="form-group">
-              <label>Contraseña</label>
-              <input
-                type="password"
-                name="password"
-                maxLength={8}
-                value={this.state.password}
-                onChange={this.handleChange}
-                required
-                placeholder="Ingresa tu contraseña"
-              />
+              <button
+                onClick={()=>this.validateDocument()}
+                  type="button"
+                  style={{
+                    height: 30,
+                    border: 0,
+                    marginTop: 30,
+                    cursor: 'pointer',
+                    background: '#48d4ab',
+                    borderRadius: 5,
+                    width:'100%'
+                  }}
+                >
+                  Validar datos
+                </button>
             </div>
+
           </div>
-          <button  type="submit" className="submit-btn">Registrarse</button>
-          <div style={{color:'black'}}>
-            <p>¿Ya tienes una cuenta? <a style={{color:'blue'}} href='/'>Iniciar Sesión</a></p>
-          </div>
+          <button style={!this.state.document_validate?{background:'red'}:{}}  type="submit" className="submit-btn">Registrarse</button>
         </form>
       </div>
     );

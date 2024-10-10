@@ -18,7 +18,8 @@ class NewPedido extends Component {
             base_imponible: 0.00,
             igv: 0.00,
             total: 0.00,
-            image:null
+            image:null,
+            text_button_add:''
         }
     }
     componentDidMount() {
@@ -81,10 +82,17 @@ class NewPedido extends Component {
     }
     select_articulo = (row) => {
         this.requestImage(row.codigo)
-        row.cantidad = 1
-        row.descuento = 0
-        row.subtotal = row.precio
-        this.setState({ item: row })
+        const index = this.state.productos.findIndex(value=>value.codigo==row.codigo)
+        var message = "AÑADIR AL PEDIDO"
+        var cantidad = 1 
+        var subtotal = row.precio
+        if(index!==-1){
+            message = "EDITAR"
+            cantidad = this.state.productos[index].cantidad
+            subtotal = this.state.productos[index].subtotal
+        }
+        const data = {...row,cantidad:cantidad,descuento:0,subtotal:subtotal}
+        this.setState({ item: data,text_button_add:message })
         this.show_modal()
     }
     buscador(palabra) {
@@ -441,6 +449,7 @@ class NewPedido extends Component {
                     data={this.state.item}
                     addData={this.add_data}
                     image={this.state.image}
+                    text_button_add = {this.state.text_button_add}
                 />
             </div>
 

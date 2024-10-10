@@ -7,7 +7,7 @@ class PedidoView(GenericAPIView):
         data = {}
         datos = request.data
         if datos["tipo_user"]==1:
-            filters = f"""AND b.ofi_codigo='{datos["familia"]}' """
+            filters = f"""AND (b.ofi_codigo='{datos["familia"]}' OR a.mov_codaux='{datos["codigo"]}') """
         else:
             filters = f"""AND a.mov_codaux='{datos["codigo"]}' """
 
@@ -30,6 +30,7 @@ class PedidoView(GenericAPIView):
                 WHERE 
                     a.ped_cierre=0 
                     AND a.elimini=0
+                    AND a.ped_venweb=1
                     {filters}
                 ORDER BY MOV_COMPRO DESC
             """
@@ -81,8 +82,8 @@ class SavePedidoView(GenericAPIView):
             cor_res = ['1']
             if res["success"] and len(res["data"])!=0:
                 cor_res = res["data"][0]
-            base_imponible = round(float(datos["total"])/1.18,2)
-            igv = float(datos["total"])-base_imponible
+            # base_imponible = round(float(datos["total"])/1.18,2)
+            # igv = float(datos["total"])-base_imponible
             correlativo = f'{datos["codigo_vendedor"]}-{str(int(cor_res.split("-")[-1])+1).zfill(7)}'
             sql = f"SELECT ope_codigo FROM t_parrametro WHERE par_anyo='{self.fecha.year}' "
             res = CAQ.query(sql,(),"GET",0)
@@ -91,12 +92,12 @@ class SavePedidoView(GenericAPIView):
             codigo_operacion =  res["data"][0].strip()
             # total_sin_descuento = self.total_sin_descuento(datos["items"])
             # descuento_total = abs(float(datos["total"])-total_sin_descuento)
-            params = (correlativo,self.fecha.strftime("%Y-%m-%d"),datos["codigo"],"S","01",self.fecha,datos["total"],
+            params = (correlativo,self.fecha.strftime("%Y-%m-%d"),datos["codigo"],"S","WEB",self.fecha,datos["total"],
                         '01','02',datos["direccion"],'01',datos["codigo_vendedor"],codigo_operacion,'01',datos["documento"],18,datos["igv"],datos["base_imponible"],
-                        1,"F1",datos["total"],0,1)
+                        1,"F1",datos["total"],0,1,1)
             sql = f"""INSERT INTO cabepedido (MOV_COMPRO,MOV_FECHA,MOV_CODAUX,MOV_MONEDA,USUARIO,FECHAUSU,ROU_TVENTA,
             ubi_codigo,pag_codigo,gui_direc,lis_codigo,ven_codigo,ope_codigo,ubi_codig2,gui_ruc,
-            ROU_PIGV,ROU_IGV,ROU_BRUTO,gui_inclu,doc_codigo,rou_submon,rou_dscto,rou_export) VALUES ({','.join('?' for i in params)})"""
+            ROU_PIGV,ROU_IGV,ROU_BRUTO,gui_inclu,doc_codigo,rou_submon,rou_dscto,rou_export,ped_venweb) VALUES ({','.join('?' for i in params)})"""
             res = CAQ.query(sql,params,'POST')
             if not res["success"]:
                 raise ValueError(res["error"])
@@ -107,7 +108,7 @@ class SavePedidoView(GenericAPIView):
                 """
             for item in datos["items"]:
                 params1 = ('53',str(self.fecha.month).zfill(2),correlativo,self.fecha,item["codigo"],"S",codigo_operacion,item["cantidad"],item["precio"],
-                            item["subtotal"],'01',self.fecha,1,"F1","S")
+                            item["subtotal"],'WEB',self.fecha,1,"F1","S")
                 sql2 = sql1+f"({','.join('?' for i in range(len(params1)))})"
                 res = CAQ.query(sql2,params1,'POST')
                 if not res["success"]:

@@ -75,16 +75,19 @@ class Pedido extends Component{
             {
                 name:"Sub Total",
                 selector:row=>row.subtotal,
+                width:'100px',
                 cell:row=>(
                     <div style={{width:'100%',display:'flex',justifyContent:'end'}}>
                         <span>{row.subtotal}</span>
                     </div>
-                ),
+                )
+               
                 
             },
             {
                 name:"IGV",
                 selector:row=>row.igv,
+                width:'100px',
                 cell:row=>(
                     <div style={{width:'100%',display:'flex',justifyContent:'end'}}>
                         <span>{row.igv}</span>
@@ -95,6 +98,7 @@ class Pedido extends Component{
             {
                 name:"Total",
                 selector:row=>row.total,
+                width:'100px',
                 cell:row=>(
                     <div style={{width:'100%',display:'flex',justifyContent:'end'}}>
                         <span>{row.total}</span>

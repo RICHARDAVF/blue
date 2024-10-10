@@ -12,7 +12,6 @@ class Page404 extends Component{
             alignItems: 'center', 
             color:'black',
             fontWeight:'bold',
-            width: '100vw', 
             height: '100vh',
             textAlign: 'center' 
         }}>

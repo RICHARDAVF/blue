@@ -35,9 +35,9 @@ class Login extends Component {
         body:JSON.stringify(data)
       })
       const res = await response.json()
-      if(res.success && res.tipo_user==1){     
+      if(res.success && parseInt(res.tipo_user)===1){     
         this.handle_login(res)
-      }else if(res.success && res.tipo_user==0){
+      }else if(res.success && parseInt(res.tipo_user)===0){
         Swal.fire({
           title:"Numero de documento",
           input:'text',
@@ -51,7 +51,7 @@ class Login extends Component {
               headers:{
                 'Content-Type':'application/json'
               },
-              body:JSON.stringify({documento:resp.value})
+              body:JSON.stringify({documento:resp.value,familia:res.familia})
             }).then(response=>{
               return response.json()
             }).then(response=>{
@@ -59,8 +59,21 @@ class Login extends Component {
 
               if(response.success){
                 this.handle_login({...res,...response})
+              }else if(!response.login){
+                Swal.fire({
+                  title:"Error",
+                  text:"No tiene una cuenta, registrese",
+                  showConfirmButton:true,
+                  showCancelButton:true
+                }).then(res=>{
+                  if(res.isConfirmed){
+                    this.context.updateState({"documento_proveedor":this.state.documento})
+                    this.props.navigate('/register')
+                  }
+                })
               }else{
                 Swal.fire({
+                  title:"Error",
                   text:"Documento, Usuario o Contraseña incorrecta"
                 })
               }
@@ -129,11 +142,7 @@ class Login extends Component {
               required
             />
           </div>
-          <button type="submit" className="login-button">Iniciar Sesión</button>
-          <div style={{color:'black'}}>
-            <p>¿Aun no tienes una cuenta? <a style={{cursor:'pointer',color:'blue'}} href='/register'>Regístrate</a></p>
-          </div>
-          
+          <button type="submit" className="login-button">Iniciar Sesión</button>          
         </form>
       </div>
     );

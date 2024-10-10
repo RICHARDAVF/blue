@@ -17,9 +17,9 @@ class ClienteCreate(GenericAPIView):
             if res["success"] and len(res["data"])>0:
                 raise ValueError("EL usuario ya esta registrado")
             sql = "SELECT ofi_codigo,aux_cuenta,aux_cuentd,ven_codigo FROM t_auxiliar WHERE aux_docum=?"
+            print(datos)
             res = CAQ.query(sql,(datos["document_proveedor"],),'GET',0)
-
-            if not res["success"] or len(res["data"])==0:
+            if not res["success"] or len(res["data"][0].strip())==0:
                 raise ValueError("No encontro una familiar para este cliente")
             familia_cliente,cuenta_soles,cuenta_dolares,codigo_vendedor = res["data"]
             sql = "SELECT MAX(AUX_CODIGO) FROM t_auxiliar WHERE MAA_CODIGO=?"
@@ -40,12 +40,12 @@ class ClienteCreate(GenericAPIView):
                 raise ValueError("No se pudo validar el documento")
 
             params = (tipo_auxiliar,str(int(correlativo)+1).zfill(6),f"{tipo_auxiliar}{str(int(correlativo)+1).zfill(6)}",cliente["razon_social"],cliente["razon_social"],codigo_vendedor,"CLIENTE",cliente["direccion"],
-                      cliente["departamento"],cliente["provincia"],cliente["distrito"],tipo_persona,datos["documento"],datos["telefono"],self.fecha,cliente["ubigeo"],tipo_documento,
-                      datos["email"],self.fecha,familia_cliente,'02',cuenta_soles,cuenta_dolares,cliente["estado"],cliente["condicion"],datos["password"])
+                      cliente["departamento"],cliente["provincia"],cliente["distrito"],tipo_persona,cliente["documento"],datos["telefono"],self.fecha,cliente["ubigeo"],tipo_documento,
+                      datos["email"],self.fecha,familia_cliente,'02',cuenta_soles,cuenta_dolares,cliente["estado"],cliente["condicion"])
  
             sql = f"""
                INSERT INTO t_auxiliar (MAA_CODIGO,aux_codigo,aux_clave,aux_nombre,aux_razon,ven_codigo,maa_nombre,aux_direcc,dep_codigo,pro_codigo,dis_codigo,aux_tipope,aux_docum,aux_telef,aux_creado,aux_edi, aux_tipdoc,
-               AUX_email,aux_fecing,ofi_codigo,pag_codigo,aux_cuenta,aux_cuentd,aux_estado,aux_condic,aux_userci) VALUES({','.join('?' for i in params)})   
+               AUX_email,aux_fecing,ofi_codigo,pag_codigo,aux_cuenta,aux_cuentd,aux_estado,aux_condic) VALUES({','.join('?' for i in params)})   
 """
             res = CAQ.query(sql,params,'POST')
             if not res["success"]:

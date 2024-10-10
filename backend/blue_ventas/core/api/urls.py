@@ -1,5 +1,4 @@
 from django.urls import path
-
 from blue_ventas.core.api.views.login.views import LoginCliente, LoginView
 from blue_ventas.core.api.views.articulos.views import ArticulosList
 from blue_ventas.core.api.views.pedidos.views import PedidoView,SavePedidoView,LoadImage
